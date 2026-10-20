@@ -8,7 +8,7 @@
 }
 
 body {
-    background-color: #06060c ; /* Tu fondo azulado oscuro */
+    background-color: #06060c  !important; /* Tu fondo azulado oscuro */
     overflow: hidden; /* Bloquea barras de desplazamiento basura */
     font-family: 'Courier New', monospace;
     width: 100vw;

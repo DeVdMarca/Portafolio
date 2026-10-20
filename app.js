@@ -6,8 +6,9 @@ let espacioActual = 'core';
 
 // VARIABLES DE LA RED NEURONAL
 let lineMesh; 
-let maxConnections = 150; // Límite de líneas simultáneas para mantenerlo ligero
-let minDistance = 2.2;    // Distancia máxima para enlazar dos neuronas
+let maxConnections = 120; // Cantidad óptima de hilos para no colapsar la GPU
+let minDistance = 2.5;    // Expandimos la distancia para forzar conexiones masivas visibles
+let maxConnectionsPerParticle = 3; // 👈 NUEVO: Límite estricto de cables que puede emitir cada neurona
 
 const windowHalfX = window.innerWidth / 2;
 const windowHalfY = window.innerHeight / 2;
@@ -18,7 +19,8 @@ function init() {
 
     // 2. Configurar la cámara en español
     camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camara.position.z = 5; 
+    // 👈 CALIBRACIÓN DE CAMARA: Alejada a 7 para que toda la red quede frente a tus ojos sin puntos ciegos
+    camara.position.z = 7; 
 
     // 3. Configurar el renderizador con fondo oscuro tecnológico profundo
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -33,6 +35,7 @@ function init() {
     renderer.domElement.style.width = '100vw';
     renderer.domElement.style.height = '100vh';
     renderer.domElement.style.zIndex = '1'; 
+    renderer.domElement.style.pointerEvents = 'none';
 
     // Inyectamos el canvas directamente al inicio del cuerpo de la página HTML
     document.body.prepend(renderer.domElement);
@@ -49,19 +52,20 @@ function init() {
 }
 
 function createBrainParticles() {
-    const particlesCount = 350; // Cantidad equilibrada de neuronas para que luzca estético
+    const particlesCount = 200; // 200 puntos es la densidad perfecta para que las líneas luzcan sofisticadas
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particlesCount * 3); 
         
     for (let i = 0; i < particlesCount * 3; i++) {
-        positions[i] = (Math.random() - 0.5) * 10; 
+        // Dispersión calibrada en un rango contenido de 8x8x8 frente a la cámara
+        positions[i] = (Math.random() - 0.5) * 8; 
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
     const material = new THREE.PointsMaterial({
         color: 0x00f3ff,
-        size: 0.04, 
+        size: 0.05, // Puntos más grandes para que destaquen sobre la oscuridad
         transparent: true,
         opacity: 0.8,
         blending: THREE.AdditiveBlending 
@@ -73,10 +77,9 @@ function createBrainParticles() {
     // --- CONFIGURACIÓN DE LOS ENLACES DE LUZ ---
     const lineGeometry = new THREE.BufferGeometry();
     const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x00f3ff,     // Azul cian neón brillante original
+        color: 0x00f3ff,     
         transparent: true,
-        opacity: 0.6,        // Subimos la opacidad para que sean muy visibles de fondo
-        linewidth: 2,        
+        opacity: 0.4, // Hilos de luz intensos y futuristas
         blending: THREE.AdditiveBlending 
     });
 
@@ -98,7 +101,6 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate);
 
-    // Efecto de inercia y suavizado para el movimiento del mouse
     targetX += (mouseX - targetX) * 0.05;
     targetY += (mouseY - targetY) * 0.05;
 
@@ -106,12 +108,12 @@ function animate() {
         const esFallo = particleSystem.material.color.getHex() === 0xff3333;
         const multiplicadorVelocidad = esFallo ? 6 : 1;
 
-        // Comportamiento de rotación y física según la carpeta abierta
+        // Comportamiento orbital clásico por sección
         if (espacioActual === 'core') {
-            particleSystem.rotation.y += 0.0008 * multiplicadorVelocidad;
-            particleSystem.rotation.x += 0.0003 * multiplicadorVelocidad;
-            particleSystem.rotation.y += targetX * 0.02;
-            particleSystem.rotation.x += targetY * 0.02;
+            particleSystem.rotation.y += 0.0006 * multiplicadorVelocidad;
+            particleSystem.rotation.x += 0.0002 * multiplicadorVelocidad;
+            particleSystem.rotation.y += targetX * 0.01;
+            particleSystem.rotation.x += targetY * 0.01;
         } else if (espacioActual === 'sobre-mi') {
             particleSystem.rotation.y += 0.002;
             particleSystem.position.z = Math.sin(Date.now() * 0.001) * 0.5;
@@ -121,22 +123,68 @@ function animate() {
             particleSystem.position.x = targetX * 0.5;
             particleSystem.position.y = -targetY * 0.5;
         } else if (espacioActual === 'stack') {
-            particleSystem.position.y -= 0.015; // Caída continua estilo matriz digital
-            if (particleSystem.position.y < -3) particleSystem.position.y = 3; // Bucle infinito
+            particleSystem.position.y -= 0.015; 
+            if (particleSystem.position.y < -3) particleSystem.position.y = 3; 
         }
 
-        // Las líneas imitan la posición exacta de las partículas
-       // lineMesh.rotation.copy(particleSystem.rotation);
-       // lineMesh.position.copy(particleSystem.position);
+        lineMesh.rotation.copy(particleSystem.rotation);
+        lineMesh.position.copy(particleSystem.position);
 
-        // ALGORITMO DE INTERCONEXIÓN DINÁMICA (MATRIZ DE PROXIMIDAD)
-       // const vertexPositions = particleSystem.geometry.attributes.position.array;
-        //const linePositions = new Float32Array(maxConnections * 2 * 3); 
-       // let numConnections = 0;
+        // ALGORITMO AVANZADO DE RED NEURONAL GEOMÉTRICA UNIFORME
+        const vertexPositions = particleSystem.geometry.attributes.position.array;
+        const totalParticles = vertexPositions.length / 3;
+        const linePositions = new Float32Array(maxConnections * 2 * 3); 
+        let numConnections = 0;
 
-       // for (let i = 0; i < vertexPositions.length / 3; i++) {
-       //
+        // Estructura temporal para contar los cables activos por cada punto
+        const connectionCounters = new Array(totalParticles).fill(0);
+
+        for (let i = 0; i < totalParticles; i++) {
+            // Si esta neurona ya alcanzó su límite uniforme de cables, saltamos a la siguiente
+            if (connectionCounters[i] >= maxConnectionsPerParticle) continue;
+
+            for (let j = i + 1; j < totalParticles; j++) {
+                if (numConnections >= maxConnections) break;
+                
+                // Si la neurona destino también está saturada, ignoramos este enlace
+                if (connectionCounters[j] >= maxConnectionsPerParticle) continue;
+
+                const ax = vertexPositions[i * 3];
+                const ay = vertexPositions[i * 3 + 1];
+                const az = vertexPositions[i * 3 + 2];
+
+                const bx = vertexPositions[j * 3];
+                const by = vertexPositions[j * 3 + 1];
+                const bz = vertexPositions[j * 3 + 2];
+
+                const dx = ax - bx;
+                const dy = ay - by;
+                const dz = az - bz;
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                // Enlace uniforme detectado bajo los parámetros simétricos
+                if (dist < minDistance) {
+                    const index = numConnections * 6;
+                    linePositions[index] = ax;
+                    linePositions[index + 1] = ay;
+                    linePositions[index + 2] = az;
+                    linePositions[index + 3] = bx;
+                    linePositions[index + 4] = by;
+                    linePositions[index + 5] = bz;
+
+                    // Registramos el uso del cable en ambas puntas para mantener la simetría
+                    connectionCounters[i]++;
+                    connectionCounters[j]++;
+                    numConnections++;
+                }
+            }
+        }
+
+        lineMesh.geometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+        lineMesh.geometry.setDrawRange(0, numConnections * 2);
+        lineMesh.geometry.attributes.position.needsUpdate = true;
     }
+
     renderer.render(scene, camara); 
 }
 
@@ -150,7 +198,7 @@ function activarNodo(nombreNodo) {
     bodyElement.classList.add('sistema-fallo');
 
     if (particleSystem && lineMesh) {
-        particleSystem.material.color.setHex(0xff3333); // Enlaces rojos por fallo momentáneo
+        particleSystem.material.color.setHex(0xff3333); 
         lineMesh.material.color.setHex(0xff3333); 
         particleSystem.material.size = 0.08;           
     }
@@ -177,7 +225,7 @@ function activarNodo(nombreNodo) {
                 lineMesh.material.color.setHex(0x00ff99);
                 particleSystem.material.size = 0.05;
             } else if (espacioActual === 'proyectos') {
-                particleSystem.material.color.setHex(0xff00ff); // Magenta/Púrpura eléctrico
+                particleSystem.material.color.setHex(0xff00ff); // Magenta
                 lineMesh.material.color.setHex(0xff00ff);
                 particleSystem.material.size = 0.06;
             } else if (espacioActual === 'stack') {
@@ -217,52 +265,39 @@ function regresarAlCore() {
         if (particleSystem && lineMesh) {
             particleSystem.material.color.setHex(0x00f3ff); // Regresa al cian base original
             lineMesh.material.color.setHex(0x00f3ff);
-            particleSystem.material.size = 0.04;           
-            particleSystem.position.set(0, 0, 0);
-            particleSystem.rotation.set(0, 0, 0);
+            particleSystem.material.size = 0.04;
+        particleSystem.position.set(0, 0, 0);
+        particleSystem.rotation.set(0, 0, 0);
         }
-
         if (coreMenu) {
-            coreMenu.style.transform = 'scale(1) translateZ(0)';
-            coreMenu.style.opacity = '1';
-            coreMenu.style.pointerEvents = 'auto';
+        coreMenu.style.transform = 'scale(1) translateZ(0)';
+        coreMenu.style.opacity = '1';
+        coreMenu.style.pointerEvents = 'auto';
         }
     }, 300);
 }
-
-                
-
-
-
-function iniciarEfectoEscritura(panel) {
-    // Buscamos todos los elementos con la clase .typing-text DENTRO del panel que se acaba de abrir
-    const elementosTexto = panel.querySelectorAll('.typing-text');
-    
-    elementosTexto.forEach(elemento => {
-        // Recuperamos el texto original guardado en el atributo data-text
+        // EFECTO ESCRITURA DIGITAL (TYPING EFFECT)
+    function iniciarEfectoEscritura(panel) {
+        const elementosTexto = panel.querySelectorAll('.typing-text');
+        elementosTexto.forEach(elemento => {
         const textoCompleto = elemento.getAttribute('data-text');
-        
-        // Vaciamos el contenedor para empezar la simulación desde cero
+        if (textoCompleto) {
         elemento.textContent = '';
-        
         let indiceLetra = 0;
-        elemento.style.borderRight = '2px solid #00f3ff'; // Agrega un cursor parpadeante de terminal
-        
-        // Creamos un bucle de tiempo (Intervalo) para escribir letra por letra
+        elemento.style.borderRight = '2px solid #00f3ff';
         const intervaloEscritura = setInterval(() => {
-            if (indiceLetra < textoCompleto.length) {
-                // Añadimos el siguiente carácter al texto visible
-                elemento.textContent += textoCompleto.charAt(indiceLetra);
-                indiceLetra++;
-            } else {
-                // Cuando termina de escribir todo el texto, limpia el bucle y remueve el cursor
-                clearInterval(intervaloEscritura);
-                elemento.style.borderRight = 'none';
-            }
-        }, 25); // Velocidad: Escribe una letra cada 25 milisegundos (ultra rápido y futurista)
-    });
-            // Inicializar todo el sistema al cargar la ventana
+        if (indiceLetra < textoCompleto.length) {
+        elemento.textContent += textoCompleto.charAt(indiceLetra);
+        indiceLetra++;
+        } else {
+        clearInterval(intervaloEscritura);
+        elemento.style.borderRight = 'none';
+        }
+        }, 25);
+        }
+        });
+        }
+        // 👈 LIBERADO: La inicialización global ahora vive de forma independiente al final de todo el archivo
         window.onload = () => {
         init();
         };
-}
