@@ -1,0 +1,259 @@
+
+
+/* 1. CONFIGURACIÓN BASE Y CONTROL DE CAPAS (Z-INDEX) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #06060c ; /* Tu fondo azulado oscuro */
+    overflow: hidden; /* Bloquea barras de desplazamiento basura */
+    font-family: 'Courier New', monospace;
+    width: 100vw;
+    height: 100vh;
+}
+
+canvas {
+    position: fixed !important; /* Forzado a quedarse quieto en la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1; /* Capa inferior base */
+    display: block;
+    pointer-events: none; /* Deja pasar los clics hacia los botones */
+}
+
+/* LA CAPA DE LA INTERFAZ FLOTA JUSTO POR ENCIMA DEL CANVAS */
+.ui-wrapper {
+    position: fixed; /* CAMBIADO DE RELATIVE A FIXED: Evita que empuje el canvas hacia abajo */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2; /* Capa superior por encima del canvas 3D */
+    pointer-events: none; /* Permite interactuar con lo que sea necesario en el fondo */
+    
+    /* Degradado sutil con transparencias (RGBA) para dejar ver las partículas */
+    background: transparent;
+}
+
+
+
+/* 2. CHASIS DEL NÚCLEO (HUD CENTRAL) */
+.hud-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto; /* IMPORTANTE: Activa los clics sobre el menú */
+    transition: all 0.8s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.ai-core {
+    position: relative;
+    width: 450px;
+    height: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Anillos holográficos de fondo */
+.hud-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px dashed rgba(0, 243, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.05);
+}
+
+.ring-outer {
+    width: 100%;
+    height: 100%;
+    animation: rotarDerecha 20s linear infinite;
+}
+
+.ring-inner {
+    width: 85%;
+    height: 85%;
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-top-color: transparent; /* Efecto radar roto */
+    animation: rotarIzquierda 10s linear infinite;
+}
+
+/* Panel del menú y botones */
+.hud-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    z-index: 3;
+}
+
+.hud-title {
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    color: rgba(0, 243, 255, 0.6);
+    margin-bottom: 10px;
+}
+
+.hud-btn {
+    background: rgba(31, 31, 51, 0.85); /* Fondo adaptado a tu color oscuro */
+    border: 1px solid #00f3ff;
+    padding: 12px 25px;
+    color: #00f3ff;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 280px;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.hud-btn:hover {
+    background: #00f3ff;
+    color: #1f1f33;
+    box-shadow: 0 0 25px #00f3ff, inset 0 0 10px rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.btn-status {
+    font-size: 0.7rem;
+    border: 1px solid rgba(0, 243, 255, 0.5);
+    padding: 2px 6px;
+}
+
+.hud-btn:hover .btn-status {
+    border-color: #1f1f33;
+}
+
+/* 3. SUB-ESPACIOS OCULTOS (NODOS DE INFORMACIÓN) */
+.sub-space-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+     backdrop-filter: blur(4px); 
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 5; /* Por encima del menú central */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    
+    /* Estado inicial: Oculto en el espacio 3D */
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8) translateZ(-100px);
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Clase inyectada por JavaScript para activarlos */
+.sub-space-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1) translateZ(0); /* Vuela al frente */
+}
+
+.space-content {
+    max-width: 800px;
+    width: 100%;
+    border-left: 3px solid #00f3ff;
+    padding-left: 20px;
+    color: #e0e0e5;
+}
+
+.space-content h2 {
+    color: #00f3ff;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.btn-back {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    background: transparent;
+    border: none;
+    color: rgba(0, 243, 255, 0.5);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-back:hover {
+    color: #00f3ff;
+}
+
+/* Cuadrícula de proyectos */
+.projects-grid {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.project-card {
+    background: rgba(0, 243, 255, 0.03);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    padding: 20px;
+    width: 50%;
+    transition: border-color 0.3s ease;
+}
+
+.project-card:hover {
+    border-color: #00f3ff;
+}
+
+/* Estilos para listas de tecnologías */
+.tech-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tech-tag {
+    color: #00f3ff;
+    font-weight: bold;
+    display: inline-block;
+    width: 120px;
+    border-right: 1px solid rgba(0, 243, 255, 0.3);
+    margin-right: 15px;
+}
+
+/* --- ANIMACIONES DE ROTACIÓN --- */
+@keyframes rotarDerecha {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes rotarIzquierda {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+/* --- EFECTO INTERFERENCIA / SYSTEM FAILURE --- */
+.sistema-fallo {
+    animation: glitchSacudida 0.3s linear infinite;
+    filter: hue-rotate(90deg) contrast(150%); /* Altera los colores de la interfaz temporalmente */
+}
+
+@keyframes glitchSacudida {
+    0% { transform: translate(0, 0) skewX(0deg); }
+    20% { transform: translate(-5px, 5px) skewX(-2deg); }
+    40% { transform: translate(5px, -3px) skewY(1deg); }
+    60% { transform: translate(-3px, -5px) skewX(3deg); }
+    80% { transform: translate(4px, 4px) skewY(-1deg); }
+    100% { transform: translate(0, 0) skewX(0deg); }
+}

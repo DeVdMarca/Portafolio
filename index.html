@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David | IA Portafolio core</title>
+    <link rel="stylesheet" href="./style.css">
+    
+</head>
+<body>
+   
+   
+
+    <!-- Capa de interfaz de usuario (HUD) superior -->
+    <main class="ui-wrapper">
+        <div class="hud-container">
+            <!-- El Núcleo Central de la IA -->
+            <div class="ai-core">
+                <!-- Anillos holográficos decorativos de fondo -->
+                <div class="hud-ring ring-outer"></div>
+                <div class="hud-ring ring-inner"></div>
+                
+                <!-- Panel de control interactivo con los botones -->
+                <nav class="hud-menu">
+                    <h1 class="hud-title">CORE_INTERFACE_v1.0</h1>
+                    
+                    <button class="hud-btn" onclick="activarNodo('sobre-mi')">
+                        <span class="btn-glitch">/SOBRE_MÍ</span>
+                        <span class="btn-status">READY</span>
+                    </button>
+                    
+                    <button class="hud-btn" onclick="activarNodo('proyectos')">
+                        <span class="btn-glitch">/PROYECTOS</span>
+                        <span class="btn-status">READY</span>
+                    </button>
+                    
+                    <button class="hud-btn" onclick="activarNodo('stack')">
+                        <span class="btn-glitch">/CORE_STACK</span>
+                        <span class="btn-status">READY</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </main>
+
+    <!-- CONTENEDORES DE LOS NODOS DE MEMORIA (SUB-ESPACIOS OCULTOS) -->
+    <!-- CONTENEDORES DE LOS NODOS DE MEMORIA (SUB-ESPACIOS) -->
+<section id="nodo-sobre-mi" class="sub-space-panel">
+    <button class="btn-back" onclick="regresarAlCore()">[ ESC_REGRESAR_AL_CORE ]</button>
+    <div class="space-content">
+        <h2>NODE // SOBRE_MÍ</h2>
+        <!-- Añadimos la clase typing-text al párrafo que queremos animar -->
+        <p class="typing-text" data-text="Soy un desarrollador de software enfocado en resolver problemas complejos mediante código limpio y estructurado. Me apasiona explorar nuevas tecnologías y construir interfaces inmersivas.">Soy un desarrollador de software enfocado en resolver problemas complejos mediante código limpio y estructurado. Me apasiona explorar nuevas tecnologías y construir interfaces inmersivas.</p>
+    </div>
+</section>
+
+<section id="nodo-proyectos" class="sub-space-panel">
+    <button class="btn-back" onclick="regresarAlCore()">[ ESC_REGRESAR_AL_CORE ]</button>
+    <div class="space-content">
+        <h2>NODE // PROYECTOS_ACTIVOS</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>01. AI_Brain_Portfolio</h3>
+                <p class="typing-text" data-text="Interfaz tridimensional interactiva construida con Three.js y CSS avanzado.">Interfaz tridimensional interactiva construida con Three.js y CSS avanzado.</p>
+            </div>
+            <div class="project-card">
+                <h3>02. Relational_Database_System</h3>
+                <p class="typing-text" data-text="Aplicación de gestión con almacenamiento optimizado mediante bases de datos relacionales.">Aplicación de gestión con almacenamiento optimizado mediante bases de datos relacionales.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <section id="nodo-stack" class="sub-space-panel">
+        <button class="btn-back" onclick="regresarAlCore()">[ ESC_REGRESAR_AL_CORE ]</button>
+        <div class="space-content">
+            <h2>NODE // CORE_STACK</h2>
+            <ul class="tech-list">
+                <li><span class="tech-tag">LANGUAGES</span> Python, JavaScript, SQL</li>
+                <li><span class="tech-tag">FRONTEND</span> HTML5, CSS3, Three.js</li>
+                <li><span class="tech-tag">TOOLS</span> Git, GitHub, VS Code</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- LIBRERÍAS Y LÓGICA LOCAL -->
+    <script src="three.min.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
