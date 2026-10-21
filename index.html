@@ -9,7 +9,26 @@
 </head>
 <body>
    
-   
+    <div class="hud-biometric-scanner">
+        <div class="scanner-header">>> SYSTEM_TELEMETRY</div>
+        <div class="scanner-row">HOST_NODE: <span id="bio-host">CONNECTING...</span></div>
+        <div class="scanner-row">OS_DETECTED: <span id="bio-os">ANALYZING...</span></div>
+        <div class="scanner-row">CPU_CORES: <span id="bio-cores">0</span>_THREADS</div>
+        <div class="scanner-row">SYS_STATUS: <span id="bio-status" class="status-stable">STABLE</span></div>
+    </div>
+
+    <!-- 🎙️ WIDGET B: PROCESADOR DE VOZ Y ONDA DE AUDIO (Centro Inferior de la Pantalla) -->
+    <div class="hud-audio-waveform">
+        <div class="waveform-container">
+            <!-- Generamos barras decorativas que vibrarán con CSS -->
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+            <span class="bar bar-4"></span>
+            <span class="bar bar-5"></span>
+        </div>
+        <div class="audio-status-text">AI_VOICE_CORE: IDLE</div>
+    </div>
 
     <!-- Capa de interfaz de usuario (HUD) superior -->
     <main class="ui-wrapper">
@@ -36,6 +55,10 @@
                     
                     <button class="hud-btn" onclick="activarNodo('stack')">
                         <span class="btn-glitch">/CORE_STACK</span>
+                        <button class="hud-btn" onclick="activarNodo('contacto')">
+                            <span class="btn-glitch">/ENLAZAR_OPERADOR</span>
+                            <span class="btn-status">SECURE</span>
+                        </button>
                         <span class="btn-status">READY</span>
                     </button>
                 </nav>
@@ -82,6 +105,30 @@
             </ul>
         </div>
     </section>
+    section id="nodo-contacto" class="sub-space-panel">
+    <button class="btn-back" onclick="regresarAlCore()">[ ESC_REGRESAR_AL_CORE ]</button>
+    <div class="space-content">
+        <h2>NODE // ENLAZAR_OPERADOR</h2>
+        <p class="typing-text" data-text="> Abriendo canal seguro de comunicación. Ingrese parámetros de transmisión..."></p>
+        
+        <!-- ⚠️ REPLAZA EL ENLACE 'tu_id_formspree' por el código real que te dará Formspree más adelante -->
+        <form action="https://formspree.io" method="POST" class="terminal-form">
+            <div class="form-group">
+                <label for="form-name">> IDENT_NAME:</label>
+                <input type="text" name="name" id="form-name" required placeholder="Nombre o Empresa..." autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="form-email">> NET_EMAIL:</label>
+                <input type="email" name="_replyto" id="form-email" required placeholder="correo@servidor.com..." autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="form-message">> COMM_TEXT:</label>
+                <textarea name="message" id="form-message" required placeholder="Escriba su propuesta de transmisión aquí..."></textarea>
+            </div>
+            <button type="submit" class="form-submit-btn">[ ENVIAR_TRANSMISIÓN ]</button>
+        </form>
+    </div>
+</section>
 
     <!-- LIBRERÍAS Y LÓGICA LOCAL -->
     <script src="three.min.js"></script>

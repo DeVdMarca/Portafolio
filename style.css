@@ -50,7 +50,7 @@ canvas {
     justify-content: center;
     align-items: center;
     pointer-events: auto; /* IMPORTANTE: Activa los clics sobre el menú */
-    transition: all 0.8s cubic-bezier(0.7, 0, 0.3, 1);
+    transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease;
 }
 
 .ai-core {
@@ -256,4 +256,166 @@ canvas {
     60% { transform: translate(-3px, -5px) skewX(3deg); }
     80% { transform: translate(4px, 4px) skewY(-1deg); }
     100% { transform: translate(0, 0) skewX(0deg); }
+}
+
+/* --- WIDGET A: ESTILOS PANEL DE BIOMETRÍA --- */
+.hud-biometric-scanner {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(10, 10, 20, 0.6);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-top: 3px solid #00f3ff; /* Línea de acento superior */
+    padding: 15px;
+    font-size: 0.75rem;
+    color: rgba(0, 243, 255, 0.8);
+    z-index: 10; /* Por encima de todo */
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.05);
+    letter-spacing: 1px;
+    pointer-events: auto; /* Permite que el usuario lo vea/toque */
+}
+
+.scanner-header {
+    font-weight: bold;
+    color: #00f3ff;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed rgba(0, 243, 255, 0.2);
+    padding-bottom: 4px;
+}
+
+.scanner-row {
+    margin-bottom: 5px;
+}
+
+.scanner-row span {
+    color: #e0e0e5;
+    font-weight: bold;
+}
+
+/* Estados del sistema */
+.status-stable { color: #33ff33 !important; text-shadow: 0 0 5px #33ff33; }
+.status-overload { color: #ff3333 !important; text-shadow: 0 0 5px #ff3333; }
+
+
+/* --- WIDGET B: ESTILOS ONDA DE AUDIO HOLOGRÁFICA --- */
+.hud-audio-waveform {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centra el widget horizontalmente */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.waveform-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+}
+
+/* Barras individuales de frecuencia */
+.bar {
+    display: inline-block;
+    width: 3px;
+    height: 5px;
+    background-color: #00f3ff;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+
+/* Animación de vibración sutil cuando la IA está hablando (Clase inyectada por JS) */
+.hud-audio-waveform.speaking .bar {
+    animation: vibrarOnda 0.5s ease-in-out infinite alternate;
+}
+
+/* Variamos los retrasos de la animación para que se vea asimétrica y realista */
+.hud-audio-waveform.speaking .bar-1 { animation-delay: 0.1s; height: 25px; }
+.hud-audio-waveform.speaking .bar-2 { animation-delay: 0.3s; height: 15px; }
+.hud-audio-waveform.speaking .bar-3 { animation-delay: 0.0s; height: 28px; }
+.hud-audio-waveform.speaking .bar-4 { animation-delay: 0.4s; height: 18px; }
+.hud-audio-waveform.speaking .bar-5 { animation-delay: 0.2s; height: 22px; }
+
+.audio-status-text {
+    font-size: 0.7rem;
+    color: rgba(0, 243, 255, 0.5);
+    letter-spacing: 2px;
+}
+
+/* Animación CSS para sacudir las barras de frecuencia */
+@keyframes vibrarOnda {
+    0% { transform: scaleY(0.3); }
+    100% { transform: scaleY(1.2); }
+}
+
+/* --- ESTILOS DEL FORMULARIO DE CONTACTO HACKER --- */
+.terminal-form {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: #00f3ff;
+    letter-spacing: 1px;
+}
+
+/* Cajas de texto e inputs futuristas */
+.terminal-form input, 
+.terminal-form textarea {
+    background: rgba(5, 5, 10, 0.6);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    padding: 12px;
+    color: #e0e0e5;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.terminal-form textarea {
+    height: 120px;
+    resize: none; /* Bloquea que el usuario deforme la caja */
+}
+
+/* Efecto de enfoque cuando el usuario hace clic para escribir */
+.terminal-form input:focus, 
+.terminal-form textarea:focus {
+    border-color: #00f3ff;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.15), inset 0 0 10px rgba(0, 243, 255, 0.05);
+}
+
+/* Botón de envío industrial */
+.form-submit-btn {
+    background: transparent;
+    border: 1px dashed #00f3ff;
+    color: #00f3ff;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+    margin-top: 10px;
+}
+
+.form-submit-btn:hover {
+    background: rgba(0, 243, 255, 0.1);
+    border-style: solid;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    text-shadow: 0 0 5px #00f3ff;
 }
